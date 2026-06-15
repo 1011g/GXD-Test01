@@ -1,0 +1,1536 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GXD 测试系统</title>
+    <style>
+        /* ======================================================
+           style.css — GXD 测试系统 全局样式
+           ====================================================== */
+
+        /* ---------- CSS 变量（统一管理主题色） ---------- */
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --white: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px rgba(0,0,0,.08);
+            --radius: 8px;
+            --sidebar-width: 220px;
+            --topbar-height: 56px;
+        }
+
+        /* ---------- 基础重置 ---------- */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 15px;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ---------- 顶部导航栏 ---------- */
+        .topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--topbar-height);
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--text);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .sidebar-toggle:hover {
+            background: #f1f5f9;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-badge {
+            font-size: 14px;
+            color: var(--text-secondary);
+            background: #f1f5f9;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        /* ---------- 整体布局（侧边栏 + 主体） ---------- */
+        .layout {
+            display: flex;
+            margin-top: var(--topbar-height);
+            min-height: calc(100vh - var(--topbar-height) - 50px);
+        }
+
+        /* ---------- 侧边栏 ---------- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: var(--topbar-height);
+            bottom: 0;
+            left: 0;
+            z-index: 50;
+            transition: transform 0.25s ease;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 12px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 14px;
+            transition: background 0.15s, color 0.15s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        .nav-item.active {
+            background: #eef2ff;
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            font-size: 18px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* ---------- 主体内容 ---------- */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 24px;
+            min-width: 0;
+        }
+
+        /* ---------- 工具栏 ---------- */
+        .toolbar {
+            margin-bottom: 20px;
+        }
+
+        .toolbar-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79,70,229,.15);
+        }
+
+        .filter-group select {
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            background: var(--white);
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* ---------- 通用按钮 ---------- */
+        .btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s, opacity 0.15s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: var(--white);
+        }
+        .btn-danger:hover {
+            background: var(--danger-hover);
+        }
+
+        /* ---------- 列表为空时的占位 ---------- */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        /* ---------- 用例卡片列表 ---------- */
+        .card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            cursor: pointer;
+            transition: box-shadow 0.15s, transform 0.1s;
+        }
+
+        .card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,.08);
+            transform: translateY(-1px);
+        }
+
+        .card-priority-bar {
+            width: 4px;
+            border-radius: 2px;
+            flex-shrink: 0;
+            align-self: stretch;
+        }
+        .card-priority-bar.p0 { background: #ef4444; }
+        .card-priority-bar.p1 { background: #f97316; }
+        .card-priority-bar.p2 { background: #eab308; }
+        .card-priority-bar.p3 { background: #22c55e; }
+
+        .card-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .status-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-tag.待执行 { background: #f1f5f9; color: #64748b; }
+        .status-tag.执行中 { background: #fef3c7; color: #b45309; }
+        .status-tag.通过   { background: #dcfce7; color: #16a34a; }
+        .status-tag.失败   { background: #fee2e2; color: #dc2626; }
+
+        .priority-tag {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* ---------- 分页控件 ---------- */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 24px;
+            padding: 12px 0;
+        }
+
+        .page-btn {
+            padding: 6px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--white);
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.15s;
+        }
+        .page-btn:hover:not(:disabled) {
+            background: #f1f5f9;
+        }
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* ---------- 模态弹窗 ---------- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.4);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--white);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 560px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0,0,0,.15);
+            animation: modalIn 0.2s ease;
+        }
+
+        .modal-sm {
+            max-width: 400px;
+        }
+
+        .modal-detail {
+            max-width: 640px;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(.95) translateY(10px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 24px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h2 {
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0 4px;
+            line-height: 1;
+        }
+        .modal-close:hover {
+            color: var(--text);
+        }
+
+        .modal-body {
+            padding: 20px 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 12px 24px 18px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ---------- 表单控件 ---------- */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        .required {
+            color: var(--danger);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79,70,229,.12);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .error-msg {
+            display: none;
+            font-size: 12px;
+            color: var(--danger);
+            margin-top: 4px;
+        }
+
+        .form-group.invalid .error-msg {
+            display: block;
+        }
+        .form-group.invalid input,
+        .form-group.invalid textarea,
+        .form-group.invalid select {
+            border-color: var(--danger);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        /* ---------- 详情弹窗内容 ---------- */
+        .detail-field {
+            margin-bottom: 16px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* ---------- Toast 提示 ---------- */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--text);
+            color: var(--white);
+            padding: 10px 24px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.25s, transform 0.25s;
+            pointer-events: none;
+            z-index: 300;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ---------- 页脚 ---------- */
+        .footer {
+            margin-left: var(--sidebar-width);
+            padding: 16px 24px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            background: var(--white);
+        }
+
+        /* ---------- 响应式适配（窄屏） ---------- */
+        @media (max-width: 768px) {
+            .sidebar-toggle {
+                display: inline-block;
+            }
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content,
+            .footer {
+                margin-left: 0;
+            }
+            .main-content {
+                padding: 16px;
+            }
+            .toolbar-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-box {
+                min-width: 0;
+            }
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            .modal {
+                max-width: 100%;
+                border-radius: 8px;
+            }
+            .modal-header,
+            .modal-body,
+            .modal-footer {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+            .card {
+                padding: 12px 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 15px;
+            }
+            .user-badge {
+                font-size: 12px;
+                padding: 3px 10px;
+            }
+            .btn {
+                font-size: 13px;
+                padding: 7px 14px;
+            }
+        }
+    
+        /* ========== 登录页面样式 ========== */
+        .login-page {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 9999;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-page.hidden { display: none; }
+        .login-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.3);
+        }
+        .login-card h1 { text-align: center; font-size: 24px; margin-bottom: 4px; color: var(--text); }
+        .login-subtitle { text-align: center; color: var(--text-secondary); font-size: 14px; margin-bottom: 28px; }
+        .login-form .form-group { margin-bottom: 18px; }
+        .login-form label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+        .login-form input {
+            width: 100%; padding: 11px 14px;
+            border: 1px solid var(--border); border-radius: var(--radius);
+            font-size: 15px; outline: none;
+            transition: border-color 0.15s;
+        }
+        .login-form input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
+        .login-btn {
+            width: 100%; padding: 12px; border: none;
+            border-radius: var(--radius); font-size: 16px; font-weight: 600;
+            cursor: pointer; margin-top: 6px;
+        }
+        .login-btn-primary { background: var(--primary); color: #fff; }
+        .login-btn-primary:hover { background: var(--primary-hover); }
+        .login-error { color: var(--danger); font-size: 13px; text-align: center; margin-top: 12px; display: none; }
+        .login-error.show { display: block; }
+        .login-toggle { text-align: center; margin-top: 18px; font-size: 14px; color: var(--text-secondary); }
+        .login-toggle a { color: var(--primary); cursor: pointer; text-decoration: none; font-weight: 500; }
+        .logout-btn {
+            background: none; border: 1px solid var(--border); border-radius: 20px;
+            padding: 4px 14px; font-size: 13px; cursor: pointer;
+            color: var(--text-secondary); transition: all 0.15s;
+        }
+        .logout-btn:hover { background: #fee2e2; color: var(--danger); border-color: var(--danger); }
+    
+        /* ========== 用户管理 ========== */
+        .user-section { display: none; }
+        .user-section.show { display: block; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .user-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .user-section-header h2 { font-size: 18px; font-weight: 700; }
+        .count-badge { font-size: 13px; color: var(--text-secondary); background: #f1f5f9; padding: 4px 14px; border-radius: 20px; }
+        .user-table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+        .user-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .user-table thead { background: #f8fafc; }
+        .user-table th { padding: 14px 16px; text-align: left; font-weight: 600; font-size: 13px; color: var(--text-secondary); border-bottom: 2px solid var(--border); }
+        .user-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+        .user-table tbody tr:last-child td { border-bottom: none; }
+        .user-table tbody tr:hover td { background: #f8fafc; }
+        .user-del-btn { background: none; border: 1px solid transparent; color: var(--danger); cursor: pointer; font-size: 13px; padding: 4px 12px; border-radius: 4px; }
+        .user-del-btn:hover { background: #fee2e2; border-color: #fecaca; }
+   </style>
+    </head>
+<body>
+
+        <!-- ========== 登录页面 ========== -->
+    <div class="login-page" id="loginPage">
+        <div class="login-card">
+            <h1>🧪 GXD 测试系统</h1>
+            <p class="login-subtitle" id="loginSubtitle">请登录以继续</p>
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="loginUsername">用户名</label>
+                    <input type="text" id="loginUsername" placeholder="请输入用户名" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">密码</label>
+                    <input type="password" id="loginPassword" placeholder="请输入密码" required>
+                </div>
+                <div class="form-group" id="confirmGroup" style="display:none">
+                    <label for="loginConfirm">确认密码</label>
+                    <input type="password" id="loginConfirm" placeholder="再次输入密码">
+                </div>
+                <button type="submit" class="login-btn login-btn-primary" id="loginBtn">登 录</button>
+                <div class="login-error" id="loginError"></div>
+                <div class="login-toggle">
+                    还没有账号？<a id="loginToggle">立即注册</a>
+                </div>
+            </form>
+        </div>
+    </div>
+<!-- ========== 顶部导航栏 ========== -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="切换菜单">☰</button>
+            <h1 class="logo">🧪 GXD 测试系统</h1>
+        </div>
+        <div class="topbar-right">
+            <span class="user-badge">👤 <span id="userName">未登录</span></span>
+            <button class="logout-btn" id="logoutBtn">退出登录</button>
+        </div>
+    </header>
+
+    <!-- ========== 整体布局容器 ========== -->
+    <div class="layout">
+
+        <!-- ========== 侧边栏 ========== -->
+        <aside class="sidebar" id="sidebar">
+            <nav>
+                <ul class="nav-list">
+                    <li class="nav-item active" data-filter="all">
+                        <span class="nav-icon">📋</span> 全部用例
+                    </li>
+                    <li class="nav-item" data-filter="待执行">
+                        <span class="nav-icon">🕐</span> 待执行
+                    </li>
+                    <li class="nav-item" data-filter="执行中">
+                        <span class="nav-icon">⚙️</span> 执行中
+                    </li>
+                    <li class="nav-item" data-filter="通过">
+                        <span class="nav-icon">✅</span> 已通过
+                    </li>
+                    <li class="nav-item" data-filter="失败">
+                        <span class="nav-icon">❌</span> 已失败
+                    </li>
+                                    <li class="nav-item" data-filter="usermgr" style="margin-top:4px;border-top:1px solid var(--border);padding-top:8px;">
+                        <span class="nav-icon">👥</span> 用户管理
+                    </li></ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>共 <span id="totalCount">0</span> 条用例</p>
+            </div>
+        </aside>
+
+        <!-- ========== 主体内容 ========== -->
+        <main class="main-content">
+
+            <section class="toolbar">
+                <div class="toolbar-row">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="搜索用例标题...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="priorityFilter">
+                            <option value="all">全部优先级</option>
+                            <option value="P0">🔴 P0（最高）</option>
+                            <option value="P1">🟠 P1（高）</option>
+                            <option value="P2">🟡 P2（中）</option>
+                            <option value="P3">🟢 P3（低）</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" id="addBtn">＋ 新建用例</button>
+                </div>
+            </section>
+
+            <section class="list-section">
+                <div class="empty-state" id="emptyState">
+                    <p>📭 暂无测试用例，点击上方"新建用例"开始创建</p>
+                </div>
+                <div class="card-list" id="cardList"></div>
+                <div class="pagination" id="pagination">
+                    <button class="page-btn" id="prevPage" disabled>‹ 上一页</button>
+                    <span class="page-info" id="pageInfo">第 1 页 / 共 1 页</span>
+                    <button class="page-btn" id="nextPage" disabled>下一页 ›</button>
+                </div>
+            </section>
+
+                    <!-- ========== 用户管理页面 ========== -->
+            <section class="user-section" id="userSection">
+                <div class="user-section-header">
+                    <h2>👥 用户管理</h2>
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <span class="count-badge">共 <span id="userCount">0</span> 个账号</span>
+                        <button class="btn btn-primary" id="openAddUserBtn" style="white-space:nowrap;">＋ 新增</button>
+                    </div>
+                </div>
+                <div class="user-table-wrap">
+                    <table class="user-table">
+                        <thead>
+                            <tr><th>名称</th><th>账号</th><th>密码</th><th>电话</th><th>操作</th></tr>
+                        </thead>
+                        <tbody id="userTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+</main>
+    </div>
+
+        <!-- ========== 新增用户弹窗 ========== -->
+    <div class="modal-overlay" id="addUserOverlay">
+        <div class="modal" style="max-width:480px;">
+            <div class="modal-header">
+                <h2 id="addUserModalTitle">＋ 新增用户</h2>
+                <button class="modal-close" id="addUserClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>名称 <span class="required">*</span></label>
+                    <input type="text" id="newName" placeholder="如：张三">
+                </div>
+                <div class="form-group">
+                    <label>账号 <span class="required">*</span></label>
+                    <input type="text" id="newUserAccount" placeholder="登录用账号">
+                </div>
+                <div class="form-group">
+                    <label>密码 <span class="required">*</span></label>
+                    <input type="text" id="newUserPass" placeholder="登录密码">
+                </div>
+                <div class="form-group">
+                    <label>电话</label>
+                    <input type="text" id="newUserPhone" placeholder="手机号码">
+                </div>
+                <div class="login-error" id="userMgrError"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="addUserCancel">取消</button>
+                <button class="btn btn-primary" id="addUserConfirm">确定</button>
+            </div>
+        </div>
+    </div>
+<!-- ========== 表单弹窗（新建/编辑） ========== -->
+    <div class="modal-overlay" id="formOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="formTitle">新建用例</h2>
+                <button class="modal-close" id="formClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="caseForm" novalidate>
+                    <div class="form-group">
+                        <label for="caseTitle">用例标题 <span class="required">*</span></label>
+                        <input type="text" id="caseTitle" placeholder="例如：登录功能验证" required>
+                        <span class="error-msg" id="titleError">用例标题不能为空</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="casePrecond">前置条件</label>
+                        <textarea id="casePrecond" rows="2" placeholder="执行前需要满足的条件（可选）"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="caseSteps">测试步骤 <span class="required">*</span></label>
+                        <textarea id="caseSteps" rows="4" placeholder="请描述测试步骤" required></textarea>
+                        <span class="error-msg" id="stepsError">测试步骤不能为空</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="caseExpected">预期结果 <span class="required">*</span></label>
+                        <textarea id="caseExpected" rows="3" placeholder="描述期望得到的输出结果" required></textarea>
+                        <span class="error-msg" id="expectedError">预期结果不能为空</span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="casePriority">优先级 <span class="required">*</span></label>
+                            <select id="casePriority" required>
+                                <option value="">请选择</option>
+                                <option value="P0">🔴 P0（最高）</option>
+                                <option value="P1">🟠 P1（高）</option>
+                                <option value="P2">🟡 P2（中）</option>
+                                <option value="P3">🟢 P3（低）</option>
+                            </select>
+                            <span class="error-msg" id="priorityError">请选择优先级</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="caseStatus">状态</label>
+                            <select id="caseStatus">
+                                <option value="待执行">🕐 待执行</option>
+                                <option value="执行中">⚙️ 执行中</option>
+                                <option value="通过">✅ 通过</option>
+                                <option value="失败">❌ 失败</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="formCancel">取消</button>
+                <button class="btn btn-primary" id="formSave">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 详情弹窗 ========== -->
+    <div class="modal-overlay" id="detailOverlay">
+        <div class="modal modal-detail">
+            <div class="modal-header">
+                <h2 id="detailTitle">用例详情</h2>
+                <button class="modal-close" id="detailClose">&times;</button>
+            </div>
+            <div class="modal-body" id="detailBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="detailCloseBtn">关闭</button>
+                <button class="btn btn-primary" id="detailEditBtn">编辑</button>
+                <button class="btn btn-danger" id="detailDeleteBtn">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 删除确认弹窗 ========== -->
+    <div class="modal-overlay" id="confirmOverlay">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>确认删除</h2>
+                <button class="modal-close" id="confirmClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>确定要删除这条测试用例吗？此操作不可撤销。</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="confirmCancel">取消</button>
+                <button class="btn btn-danger" id="confirmOk">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== Toast 提示 ========== -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ========== 页脚 ========== -->
+    <footer class="footer">
+        <p>&copy; 2026 GXD 测试系统 · 纯前端实现 · 数据保存在本地缓存中</p>
+    </footer>
+
+    <script>
+                /* ========== 登录 / 注册 逻辑 ========== */
+        function loadUsers() {
+            const stored = localStorage.getItem('gxd_users');
+            if (stored) { try { return JSON.parse(stored); } catch (e) {} }
+            return [{ name: '管理员', username: 'admin', password: 'admin123', phone: '' }];
+        }
+        function saveUsers(users) { localStorage.setItem('gxd_users', JSON.stringify(users)); }
+        function getCurrentUser() { return localStorage.getItem('gxd_current_user'); }
+        function setCurrentUser(username) {
+            if (username) localStorage.setItem('gxd_current_user', username);
+            else localStorage.removeItem('gxd_current_user');
+        }
+
+        let loginMode = 'login';
+        let editingUsername = null;
+        const users = loadUsers();
+
+        function checkLogin() {
+            const loginPage = document.getElementById('loginPage');
+            const currentUser = getCurrentUser();
+            if (currentUser && users.some(u => u.username === currentUser)) {
+                loginPage.classList.add('hidden');
+                document.getElementById('userName').textContent = currentUser;
+                return true;
+            } else {
+                loginPage.classList.remove('hidden');
+                document.getElementById('userName').textContent = '未登录';
+                return false;
+            }
+        }
+
+        function setupLogin() {
+            const loginPage = document.getElementById('loginPage');
+            const loginForm = document.getElementById('loginForm');
+            const loginBtn = document.getElementById('loginBtn');
+            const loginError = document.getElementById('loginError');
+            const loginToggle = document.getElementById('loginToggle');
+            const loginSubtitle = document.getElementById('loginSubtitle');
+            const confirmGroup = document.getElementById('confirmGroup');
+            const usernameInput = document.getElementById('loginUsername');
+            const passwordInput = document.getElementById('loginPassword');
+            const confirmInput = document.getElementById('loginConfirm');
+
+            loginToggle.addEventListener('click', function () {
+                if (loginMode === 'login') {
+                    loginMode = 'register';
+                    loginBtn.textContent = '注 册';
+                    loginSubtitle.textContent = '创建一个新账号';
+                    loginToggle.textContent = '已有账号？点击登录';
+                    confirmGroup.style.display = 'block';
+                } else {
+                    loginMode = 'login';
+                    loginBtn.textContent = '登 录';
+                    loginSubtitle.textContent = '请登录以继续';
+                    loginToggle.textContent = '立即注册';
+                    confirmGroup.style.display = 'none';
+                }
+                loginError.classList.remove('show');
+            });
+
+            loginForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                loginError.classList.remove('show');
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value.trim();
+
+                if (!username || !password) {
+                    loginError.textContent = '请填写用户名和密码';
+                    loginError.classList.add('show');
+                    return;
+                }
+
+                if (loginMode === 'register') {
+                    const confirm = confirmInput.value.trim();
+                    if (password !== confirm) {
+                        loginError.textContent = '两次密码输入不一致';
+                        loginError.classList.add('show');
+                        return;
+                    }
+                    if (password.length < 4) {
+                        loginError.textContent = '密码长度不能少于4位';
+                        loginError.classList.add('show');
+                        return;
+                    }
+                    if (users.some(u => u.username === username)) {
+                        loginError.textContent = '该用户名已被注册';
+                        loginError.classList.add('show');
+                        return;
+                    }
+                    users.push({ name: username, username, password, phone: '' });
+                    saveUsers(users);
+                    setCurrentUser(username);
+                    loginPage.classList.add('hidden');
+                    document.getElementById('userName').textContent = username;
+                } else {
+                    const user = users.find(u => u.username === username && u.password === password);
+                    if (!user) {
+                        loginError.textContent = '用户名或密码错误';
+                        loginError.classList.add('show');
+                        return;
+                    }
+                    setCurrentUser(username);
+                    loginPage.classList.add('hidden');
+                    document.getElementById('userName').textContent = username;
+                }
+                usernameInput.value = '';
+                passwordInput.value = '';
+                confirmInput.value = '';
+            });
+
+            document.getElementById('logoutBtn').addEventListener('click', function () {
+                setCurrentUser(null);
+                loginPage.classList.remove('hidden');
+                document.getElementById('userName').textContent = '未登录';
+                usernameInput.value = '';
+                passwordInput.value = '';
+                confirmInput.value = '';
+                loginMode = 'login';
+                loginBtn.textContent = '登 录';
+                loginSubtitle.textContent = '请登录以继续';
+                loginToggle.textContent = '立即注册';
+                confirmGroup.style.display = 'none';
+                loginError.classList.remove('show');
+            });
+        }
+/* ======================================================
+           script.js — GXD 测试系统 应用逻辑
+           ====================================================== */
+
+        /* ========== 1. 数据管理 ========== */
+
+        function loadCases() {
+            const stored = localStorage.getItem('gxd_cases');
+            if (stored) {
+                try { return JSON.parse(stored); } catch (e) { /* 忽略损坏数据 */ }
+            }
+            return [
+                { id: 1, title: '用户登录功能验证', precond: '已注册账号', steps: '1. 打开登录页面\n2. 输入正确用户名和密码\n3. 点击登录', expected: '页面跳转到首页，显示用户昵称', priority: 'P0', status: '通过' },
+                { id: 2, title: '注册表单校验测试', precond: '无', steps: '1. 打开注册页面\n2. 不填任何字段直接提交\n3. 观察错误提示', expected: '所有必填字段显示红色错误提示', priority: 'P1', status: '待执行' },
+                { id: 3, title: '搜索功能边界测试', precond: '系统有至少1条数据', steps: '1. 输入超长搜索关键词\n2. 点击搜索\n3. 输入特殊字符 @@!! 搜索', expected: '系统正常处理，不崩溃', priority: 'P2', status: '执行中' },
+                { id: 4, title: '数据导出性能测试', precond: '系统中至少有10000条数据', steps: '1. 在数据管理页点击"导出"\n2. 记录导出完成时间', expected: '导出时间不超过30秒', priority: 'P0', status: '失败' },
+                { id: 5, title: '密码修改流程测试', precond: '用户已登录', steps: '1. 进入个人设置\n2. 修改密码\n3. 使用新密码重新登录', expected: '新旧密码切换正常，旧密码失效', priority: 'P1', status: '待执行' },
+                { id: 6, title: '移动端页面布局适配', precond: '无', steps: '1. 用手机浏览器打开系统\n2. 检查各页面布局是否错乱', expected: '页面自适应，无明显错位', priority: 'P3', status: '待执行' },
+            ];
+        }
+
+        function saveCases(cases) {
+            localStorage.setItem('gxd_cases', JSON.stringify(cases));
+        }
+
+        let cases = loadCases();
+        let currentFilter = 'all';
+        let currentPriority = 'all';
+        let currentSearch = '';
+        let currentPage = 1;
+        const PAGE_SIZE = 4;
+        let editingId = null;
+
+        /* ========== 2. 工具函数 ========== */
+
+        function generateId() {
+            return Date.now() + Math.floor(Math.random() * 1000);
+        }
+
+        function getFilteredData() {
+            let result = [...cases];
+            if (currentFilter !== 'all') {
+                result = result.filter(c => c.status === currentFilter);
+            }
+            if (currentPriority !== 'all') {
+                result = result.filter(c => c.priority === currentPriority);
+            }
+            if (currentSearch.trim()) {
+                const keyword = currentSearch.trim().toLowerCase();
+                result = result.filter(c => c.title.toLowerCase().includes(keyword));
+            }
+            result.sort((a, b) => b.id - a.id);
+            const total = result.length;
+            const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+            const page = Math.min(currentPage, totalPages);
+            const start = (page - 1) * PAGE_SIZE;
+            const pageData = result.slice(start, start + PAGE_SIZE);
+            return { pageData, total, totalPages, page };
+        }
+
+        function showToast(msg) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.classList.add('show');
+            clearTimeout(el._timer);
+            el._timer = setTimeout(() => el.classList.remove('show'), 2000);
+        }
+
+        /* ========== 3. 渲染 ========== */
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function renderList() {
+            const { pageData, total, totalPages, page } = getFilteredData();
+            const container = document.getElementById('cardList');
+            const emptyState = document.getElementById('emptyState');
+            const pagination = document.getElementById('pagination');
+
+            document.getElementById('totalCount').textContent = cases.length;
+
+            if (pageData.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                pagination.style.display = 'none';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            pagination.style.display = 'flex';
+
+            const priorityMap = { P0: 'p0', P1: 'p1', P2: 'p2', P3: 'p3' };
+            let html = '';
+            pageData.forEach(c => {
+                html += `
+                    <div class="card" data-id="${c.id}">
+                        <div class="card-priority-bar ${priorityMap[c.priority] || 'p3'}"></div>
+                        <div class="card-body">
+                            <div class="card-title">${escapeHtml(c.title)}</div>
+                            <div class="card-meta">
+                                <span class="status-tag ${c.status}">${c.status}</span>
+                                <span class="priority-tag">${c.priority}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            container.querySelectorAll('.card').forEach(el => {
+                el.addEventListener('click', () => showDetail(parseInt(el.dataset.id)));
+            });
+
+            currentPage = page;
+            document.getElementById('pageInfo').textContent = `第 ${page} 页 / 共 ${totalPages} 页（共 ${total} 条）`;
+            document.getElementById('prevPage').disabled = page <= 1;
+            document.getElementById('nextPage').disabled = page >= totalPages;
+        }
+
+        /* ========== 4. 弹窗交互 ========== */
+
+        function showDetail(id) {
+            const c = cases.find(item => item.id === id);
+            if (!c) return;
+            document.getElementById('detailBody').innerHTML = `
+                <div class="detail-field">
+                    <div class="detail-label">用例标题</div>
+                    <div class="detail-value">${escapeHtml(c.title)}</div>
+                </div>
+                <div class="detail-field">
+                    <div class="detail-label">前置条件</div>
+                    <div class="detail-value">${escapeHtml(c.precond || '无')}</div>
+                </div>
+                <div class="detail-field">
+                    <div class="detail-label">测试步骤</div>
+                    <div class="detail-value">${escapeHtml(c.steps)}</div>
+                </div>
+                <div class="detail-field">
+                    <div class="detail-label">预期结果</div>
+                    <div class="detail-value">${escapeHtml(c.expected)}</div>
+                </div>
+                <div class="detail-field">
+                    <div class="detail-label">优先级 / 状态</div>
+                    <div class="detail-value">${c.priority} · <span class="status-tag ${c.status}">${c.status}</span></div>
+                </div>
+            `;
+            document.getElementById('detailOverlay').dataset.viewId = id;
+            document.getElementById('detailOverlay').classList.add('show');
+        }
+
+        function openForm(id) {
+            editingId = id;
+            const form = document.getElementById('caseForm');
+            document.querySelectorAll('.form-group').forEach(el => el.classList.remove('invalid'));
+            form.reset();
+            if (id === null) {
+                document.getElementById('formTitle').textContent = '新建用例';
+                document.getElementById('caseStatus').value = '待执行';
+            } else {
+                document.getElementById('formTitle').textContent = '编辑用例';
+                const c = cases.find(item => item.id === id);
+                if (!c) return;
+                document.getElementById('caseTitle').value = c.title;
+                document.getElementById('casePrecond').value = c.precond || '';
+                document.getElementById('caseSteps').value = c.steps;
+                document.getElementById('caseExpected').value = c.expected;
+                document.getElementById('casePriority').value = c.priority;
+                document.getElementById('caseStatus').value = c.status;
+            }
+            document.getElementById('formOverlay').classList.add('show');
+        }
+
+        function validateForm() {
+            let valid = true;
+            const checks = [
+                { id: 'caseTitle', cls: 'form-group:has(#caseTitle)' },
+                { id: 'caseSteps', cls: 'form-group:has(#caseSteps)' },
+                { id: 'caseExpected', cls: 'form-group:has(#caseExpected)' },
+                { id: 'casePriority', cls: 'form-group:has(#casePriority)' },
+            ];
+            checks.forEach(({ id, cls }) => {
+                const group = document.querySelector(`.${cls}`);
+                const val = document.getElementById(id).value.trim();
+                if (!val) { group.classList.add('invalid'); valid = false; }
+                else { group.classList.remove('invalid'); }
+            });
+            return valid;
+        }
+
+        function saveForm() {
+            if (!validateForm()) { showToast('请完善必填字段'); return; }
+            const data = {
+                title: document.getElementById('caseTitle').value.trim(),
+                precond: document.getElementById('casePrecond').value.trim(),
+                steps: document.getElementById('caseSteps').value.trim(),
+                expected: document.getElementById('caseExpected').value.trim(),
+                priority: document.getElementById('casePriority').value,
+                status: document.getElementById('caseStatus').value,
+            };
+            if (editingId === null) {
+                data.id = generateId();
+                cases.unshift(data);
+                showToast('新建用例成功 🎉');
+            } else {
+                const idx = cases.findIndex(c => c.id === editingId);
+                if (idx !== -1) cases[idx] = { ...cases[idx], ...data };
+                showToast('更新用例成功 ✅');
+            }
+            saveCases(cases);
+            closeAllModals();
+            renderList();
+        }
+
+        let pendingDeleteId = null;
+
+        function confirmDelete(id) {
+            pendingDeleteId = id;
+            document.getElementById('confirmOverlay').classList.add('show');
+        }
+
+        function executeDelete() {
+            if (pendingDeleteId === null) return;
+            cases = cases.filter(c => c.id !== pendingDeleteId);
+            saveCases(cases);
+            pendingDeleteId = null;
+            closeAllModals();
+            renderList();
+            showToast('删除成功 🗑️');
+        }
+
+        function closeAllModals() {
+            document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('show'));
+            editingId = null;
+            pendingDeleteId = null;
+        }
+
+        /* ========== 5. 绑定事件 ========== */
+
+        function bindEvents() {
+            document.getElementById('sidebarToggle').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('open');
+            });
+            document.querySelector('.main-content').addEventListener('click', () => {
+                const s = document.getElementById('sidebar');
+                if (window.innerWidth <= 768 && s.classList.contains('open')) s.classList.remove('open');
+            });
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.addEventListener('click', function () {
+                    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.filter;
+                    currentPage = 1;
+                    renderList();
+                });
+            });
+            let st = null;
+            document.getElementById('searchInput').addEventListener('input', function () {
+                clearTimeout(st);
+                st = setTimeout(() => { currentSearch = this.value; currentPage = 1; renderList(); }, 300);
+            });
+            document.getElementById('priorityFilter').addEventListener('change', function () {
+                currentPriority = this.value; currentPage = 1; renderList();
+            });
+            document.getElementById('addBtn').addEventListener('click', () => openForm(null));
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentPage > 1) { currentPage--; renderList(); }
+            });
+            document.getElementById('nextPage').addEventListener('click', () => {
+                const { totalPages } = getFilteredData();
+                if (currentPage < totalPages) { currentPage++; renderList(); }
+            });
+            document.getElementById('formClose').addEventListener('click', closeAllModals);
+            document.getElementById('formCancel').addEventListener('click', closeAllModals);
+            document.getElementById('formSave').addEventListener('click', saveForm);
+            document.getElementById('formOverlay').addEventListener('click', function (e) {
+                if (e.target === this) closeAllModals();
+            });
+            document.getElementById('detailClose').addEventListener('click', closeAllModals);
+            document.getElementById('detailCloseBtn').addEventListener('click', closeAllModals);
+            document.getElementById('detailOverlay').addEventListener('click', function (e) {
+                if (e.target === this) closeAllModals();
+            });
+            document.getElementById('detailEditBtn').addEventListener('click', function () {
+                const id = parseInt(document.getElementById('detailOverlay').dataset.viewId);
+                closeAllModals();
+                openForm(id);
+            });
+            document.getElementById('detailDeleteBtn').addEventListener('click', function () {
+                const id = parseInt(document.getElementById('detailOverlay').dataset.viewId);
+                closeAllModals();
+                confirmDelete(id);
+            });
+            document.getElementById('confirmClose').addEventListener('click', closeAllModals);
+            document.getElementById('confirmCancel').addEventListener('click', closeAllModals);
+            document.getElementById('confirmOverlay').addEventListener('click', function (e) {
+                if (e.target === this) closeAllModals();
+            });
+            document.getElementById('confirmOk').addEventListener('click', executeDelete);
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAllModals(); });
+        }
+
+        /* ========== 6. 初始化 ========== */
+
+        document.addEventListener('DOMContentLoaded', function () {
+            checkLogin();
+            setupLogin();
+                        setupUserPage();
+            bindEvents();
+            renderList();
+        });
+    
+        /* ========== 用户管理 ========== */
+                function renderUserPage() {
+            const tbody = document.getElementById('userTableBody');
+            const currentUser = getCurrentUser();
+            document.getElementById('userCount').textContent = users.length;
+            let html = '';
+            users.forEach(function(u) {
+                const isSelf = u.username === currentUser;
+                const isDefault = u.username === 'admin';
+                const name = u.name || u.username;
+                const phone = u.phone || '-';
+                var actions = '';
+                if (isDefault && isSelf) {
+                    actions = '<span style="color:var(--text-secondary);font-size:12px;">不可操作</span>';
+                } else {
+                    actions = '<button class="user-edit-btn" data-username="' + u.username + '" style="background:none;border:1px solid var(--border);color:var(--primary);cursor:pointer;font-size:12px;padding:4px 12px;border-radius:4px;margin-right:6px;">编辑</button><button class="user-del-btn" data-username="' + u.username + '" style="background:none;border:1px solid transparent;color:var(--danger);cursor:pointer;font-size:12px;padding:4px 12px;border-radius:4px;">删除</button>';
+                }
+                html += '<tr><td>' + name + (isSelf ? ' <span style="font-size:12px;color:var(--text-secondary)">(当前)</span>' : '') + '</td><td>' + u.username + '</td><td>' + u.password + '</td><td>' + phone + '</td><td>' + actions + '</td></tr>';
+            });
+            tbody.innerHTML = html;
+
+            // 编辑按钮
+            tbody.querySelectorAll('.user-edit-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var uname = this.dataset.username;
+                    var user = users.find(function(u) { return u.username === uname; });
+                    if (!user) return;
+                    // 填充表单
+                    document.getElementById('newName').value = user.name || '';
+                    document.getElementById('newUserAccount').value = user.username;
+                    document.getElementById('newUserPass').value = user.password;
+                    document.getElementById('newUserPhone').value = user.phone || '';
+                    document.getElementById('userMgrError').classList.remove('show');
+                    // 切换编辑模式
+                    editingUsername = user.username;
+                    document.getElementById('addUserModalTitle').textContent = '✏️ 编辑用户';
+                    document.getElementById('newUserAccount').disabled = true;
+                    document.getElementById('addUserOverlay').classList.add('show');
+                });
+            });
+
+            // 删除按钮
+            tbody.querySelectorAll('.user-del-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var delName = this.dataset.username;
+                    var idx = users.findIndex(function(u) { return u.username === delName; });
+                    if (idx !== -1) users.splice(idx, 1);
+                    saveUsers(users);
+                    renderUserPage();
+                    showToast('已删除用户：' + delName);
+                });
+            });
+        }
+                function setupUserPage() {
+            // 打开用户管理
+            document.querySelectorAll('.nav-item[data-filter="usermgr"]').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    document.getElementById('userSection').classList.add('show');
+                    document.querySelector('.toolbar').style.display = 'none';
+                    document.querySelector('.list-section').style.display = 'none';
+                    document.querySelector('.main-content').scrollTop = 0;
+                    renderUserPage();
+                });
+            });
+
+            // 其他侧边栏隐藏用户管理
+            document.querySelectorAll('.nav-item').forEach(function(el) {
+                if (el.dataset.filter !== 'usermgr') {
+                    el.addEventListener('click', function() {
+                        document.getElementById('userSection').classList.remove('show');
+                        var tb = document.querySelector('.toolbar');
+                        if (tb) tb.style.display = '';
+                        var ls = document.querySelector('.list-section');
+                        if (ls) ls.style.display = '';
+                    });
+                }
+            });
+
+            // 打开新增弹窗
+            document.getElementById('openAddUserBtn').addEventListener('click', function() {
+                editingUsername = null;
+                document.getElementById('addUserModalTitle').textContent = '＋ 新增用户';
+                document.getElementById('newUserAccount').disabled = false;
+                ['newName','newUserAccount','newUserPass','newUserPhone'].forEach(function(id) {
+                    document.getElementById(id).value = '';
+                });
+                document.getElementById('userMgrError').classList.remove('show');
+                document.getElementById('addUserOverlay').classList.add('show');
+            });
+
+            // 关闭弹窗
+            function closeUM() { document.getElementById('addUserOverlay').classList.remove('show'); }
+            document.getElementById('addUserClose').addEventListener('click', closeUM);
+            document.getElementById('addUserCancel').addEventListener('click', closeUM);
+            document.getElementById('addUserOverlay').addEventListener('click', function(e) { if (e.target === this) closeUM(); });
+
+            // 确定添加/编辑
+            document.getElementById('addUserConfirm').addEventListener('click', function() {
+                var name = document.getElementById('newName').value.trim();
+                var username = document.getElementById('newUserAccount').value.trim();
+                var password = document.getElementById('newUserPass').value.trim();
+                var phone = document.getElementById('newUserPhone').value.trim();
+                var err = document.getElementById('userMgrError');
+
+                if (!name || !username || !password) { err.textContent = '名称、账号、密码为必填项'; err.classList.add('show'); return; }
+                if (password.length < 4) { err.textContent = '密码长度不能少于4位'; err.classList.add('show'); return; }
+                if (!editingUsername && users.some(function(u) { return u.username === username; })) { err.textContent = '该账号已存在'; err.classList.add('show'); return; }
+                err.classList.remove('show');
+
+                if (editingUsername) {
+                    // 编辑模式
+                    var idx = users.findIndex(function(u) { return u.username === editingUsername; });
+                    if (idx !== -1) {
+                        users[idx].name = name;
+                        users[idx].password = password;
+                        users[idx].phone = phone;
+                        saveUsers(users);
+                        showToast('用户信息已更新');
+                    }
+                } else {
+                    // 新增模式
+                    users.push({ name: name, username: username, password: password, phone: phone });
+                    saveUsers(users);
+                    showToast('新增用户成功：' + name);
+                }
+                closeUM();
+                renderUserPage();
+            });
+        }
+
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
