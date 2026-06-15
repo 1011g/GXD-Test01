@@ -694,12 +694,27 @@
         .user-table tbody tr:hover td { background: #f8fafc; }
         .user-del-btn { background: none; border: 1px solid transparent; color: var(--danger); cursor: pointer; font-size: 13px; padding: 4px 12px; border-radius: 4px; }
         .user-del-btn:hover { background: #fee2e2; border-color: #fecaca; }
+    
     /* ---------- 工作台 ---------- */
     .dashboard-section { display: none; }
-    .dashboard-section.show { display: block; }
-    .dashboard-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 40px; text-align: center; box-shadow: var(--shadow); }
-    .dashboard-card h2 { font-size: 20px; margin-bottom: 8px; }
-    .dashboard-card p { color: var(--text-secondary); font-size: 14px; }
+    .dashboard-section.show { display: block; animation: dashFade 0.25s ease; }
+    @keyframes dashFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .d-header { margin-bottom: 24px; }
+    .d-header h2 { font-size: 22px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+    .d-header p { font-size: 14px; color: var(--text-secondary); }
+    .d-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+    .d-stat-card { border-radius: 12px; padding: 24px; color: #fff; box-shadow: 0 4px 20px rgba(0,0,0,.1); transition: transform 0.2s; }
+    .d-stat-card:hover { transform: translateY(-3px); }
+    .d-stat-number { font-size: 32px; font-weight: 700; margin-bottom: 2px; line-height: 1; }
+    .d-stat-label { font-size: 14px; opacity: .85; }
+    .d-section-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 12px; padding-left: 2px; }
+    .d-actions { display: flex; gap: 12px; margin-bottom: 28px; }
+    .d-recent { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 0 16px; box-shadow: var(--shadow); }
+    .d-recent-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .d-recent-item:last-child { border-bottom: none; }
+    .d-recent-item .d-name { font-weight: 500; }
+    .d-recent-item .d-meta { color: var(--text-secondary); font-size: 12px; }
+    .d-empty-list { text-align: center; padding: 24px; color: var(--text-secondary); font-size: 14px; }
    </style>
     </head>
 <body>
@@ -748,76 +763,57 @@
         <!-- ========== 侧边栏 ========== -->
         <aside class="sidebar" id="sidebar">
             <nav>
-                <ul class="nav-list">
-                                        <li class="nav-item active" data-filter="dashboard">
+                                <ul class="nav-list">
+                    <li class="nav-item active" data-filter="dashboard">
                         <span class="nav-icon">🏠</span> 工作台
                     </li>
-                    <li class="nav-item" data-filter="all">
-                        <span class="nav-icon">📋</span> 全部用例
-                    </li>
-                    <li class="nav-item" data-filter="待执行">
-                        <span class="nav-icon">🕐</span> 待执行
-                    </li>
-                    <li class="nav-item" data-filter="执行中">
-                        <span class="nav-icon">⚙️</span> 执行中
-                    </li>
-                    <li class="nav-item" data-filter="通过">
-                        <span class="nav-icon">✅</span> 已通过
-                    </li>
-                    <li class="nav-item" data-filter="失败">
-                        <span class="nav-icon">❌</span> 已失败
-                    </li>
-                                    <li class="nav-item" data-filter="usermgr" style="margin-top:4px;border-top:1px solid var(--border);padding-top:8px;">
+                    <li class="nav-item" data-filter="usermgr" style="margin-top:4px;border-top:1px solid var(--border);padding-top:8px;">
                         <span class="nav-icon">👥</span> 用户管理
-                    </li></ul>
+                    </li>
+                </ul>
             </nav>
             <div class="sidebar-footer">
-                <p>共 <span id="totalCount">0</span> 条用例</p>
+                <p>共 <span id="userCount2">0</span> 个账号</p>
             </div>
         </aside>
 
         <!-- ========== 主体内容 ========== -->
         <main class="main-content">
 
-                        <!-- ========== 工作台 ========== -->
+                                    <!-- ========== 工作台 ========== -->
             <section class="dashboard-section" id="dashboardSection">
-                <div class="dashboard-card">
+                <div class="d-header">
                     <h2>🏠 工作台</h2>
-                    <p>欢迎使用 GXD 测试系统</p>
-                    <p style="margin-top:8px;font-size:13px;">功能开发中，敬请期待...</p>
+                    <p>欢迎回来，<span id="dashUserName">用户</span></p>
                 </div>
-            </section>
-            <section class="toolbar">
-                <div class="toolbar-row">
-                    <div class="search-box">
-                        <input type="text" id="searchInput" placeholder="搜索用例标题...">
-                    </div>
-                    <div class="filter-group">
-                        <select id="priorityFilter">
-                            <option value="all">全部优先级</option>
-                            <option value="P0">🔴 P0（最高）</option>
-                            <option value="P1">🟠 P1（高）</option>
-                            <option value="P2">🟡 P2（中）</option>
-                            <option value="P3">🟢 P3（低）</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-primary" id="addBtn">＋ 新建用例</button>
-                </div>
-            </section>
 
-            <section class="list-section">
-                <div class="empty-state" id="emptyState">
-                    <p>📭 暂无测试用例，点击上方"新建用例"开始创建</p>
+                <div class="d-stats">
+                    <div class="d-stat-card" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);">
+                        <div class="d-stat-number" id="dashTotalUsers">0</div>
+                        <div class="d-stat-label">总用户数</div>
+                    </div>
+                    <div class="d-stat-card" style="background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);">
+                        <div class="d-stat-number" id="dashAdminCount">0</div>
+                        <div class="d-stat-label">管理员</div>
+                    </div>
+                    <div class="d-stat-card" style="background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);">
+                        <div class="d-stat-number" id="dashUserCount">0</div>
+                        <div class="d-stat-label">普通用户</div>
+                    </div>
                 </div>
-                <div class="card-list" id="cardList"></div>
-                <div class="pagination" id="pagination">
-                    <button class="page-btn" id="prevPage" disabled>‹ 上一页</button>
-                    <span class="page-info" id="pageInfo">第 1 页 / 共 1 页</span>
-                    <button class="page-btn" id="nextPage" disabled>下一页 ›</button>
+
+                <div class="d-section-title">快捷操作</div>
+                <div class="d-actions">
+                    <button class="btn btn-primary" id="dashAddBtn" style="white-space:nowrap;">＋ 新增用户</button>
+                    <button class="btn btn-secondary" id="dashGotoUserBtn">进入用户管理 →</button>
+                </div>
+
+                <div class="d-section-title">最近添加</div>
+                <div class="d-recent" id="dashRecentList">
+                    <div class="d-empty-list">暂无数据</div>
                 </div>
             </section>
-
-                    <!-- ========== 用户管理页面 ========== -->
+            <!-- ========== 用户管理页面 ========== -->
             <section class="user-section" id="userSection">
                 <div class="user-section-header">
                     <h2>👥 用户管理</h2>
@@ -870,106 +866,6 @@
             </div>
         </div>
     </div>
-<!-- ========== 表单弹窗（新建/编辑） ========== -->
-    <div class="modal-overlay" id="formOverlay">
-        <div class="modal">
-            <div class="modal-header">
-                <h2 id="formTitle">新建用例</h2>
-                <button class="modal-close" id="formClose">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="caseForm" novalidate>
-                    <div class="form-group">
-                        <label for="caseTitle">用例标题 <span class="required">*</span></label>
-                        <input type="text" id="caseTitle" placeholder="例如：登录功能验证" required>
-                        <span class="error-msg" id="titleError">用例标题不能为空</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="casePrecond">前置条件</label>
-                        <textarea id="casePrecond" rows="2" placeholder="执行前需要满足的条件（可选）"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="caseSteps">测试步骤 <span class="required">*</span></label>
-                        <textarea id="caseSteps" rows="4" placeholder="请描述测试步骤" required></textarea>
-                        <span class="error-msg" id="stepsError">测试步骤不能为空</span>
-                    </div>
-                    <div class="form-group">
-                        <label for="caseExpected">预期结果 <span class="required">*</span></label>
-                        <textarea id="caseExpected" rows="3" placeholder="描述期望得到的输出结果" required></textarea>
-                        <span class="error-msg" id="expectedError">预期结果不能为空</span>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="casePriority">优先级 <span class="required">*</span></label>
-                            <select id="casePriority" required>
-                                <option value="">请选择</option>
-                                <option value="P0">🔴 P0（最高）</option>
-                                <option value="P1">🟠 P1（高）</option>
-                                <option value="P2">🟡 P2（中）</option>
-                                <option value="P3">🟢 P3（低）</option>
-                            </select>
-                            <span class="error-msg" id="priorityError">请选择优先级</span>
-                        </div>
-                        <div class="form-group">
-                            <label for="caseStatus">状态</label>
-                            <select id="caseStatus">
-                                <option value="待执行">🕐 待执行</option>
-                                <option value="执行中">⚙️ 执行中</option>
-                                <option value="通过">✅ 通过</option>
-                                <option value="失败">❌ 失败</option>
-                            </select>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="formCancel">取消</button>
-                <button class="btn btn-primary" id="formSave">保存</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========== 详情弹窗 ========== -->
-    <div class="modal-overlay" id="detailOverlay">
-        <div class="modal modal-detail">
-            <div class="modal-header">
-                <h2 id="detailTitle">用例详情</h2>
-                <button class="modal-close" id="detailClose">&times;</button>
-            </div>
-            <div class="modal-body" id="detailBody"></div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="detailCloseBtn">关闭</button>
-                <button class="btn btn-primary" id="detailEditBtn">编辑</button>
-                <button class="btn btn-danger" id="detailDeleteBtn">删除</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========== 删除确认弹窗 ========== -->
-    <div class="modal-overlay" id="confirmOverlay">
-        <div class="modal modal-sm">
-            <div class="modal-header">
-                <h2>确认删除</h2>
-                <button class="modal-close" id="confirmClose">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p>确定要删除这条测试用例吗？此操作不可撤销。</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="confirmCancel">取消</button>
-                <button class="btn btn-danger" id="confirmOk">确认删除</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========== Toast 提示 ========== -->
-    <div class="toast" id="toast"></div>
-
-    <!-- ========== 页脚 ========== -->
-    <footer class="footer">
-        <p>&copy; 2026 GXD 测试系统 · 纯前端实现 · 数据保存在本地缓存中</p>
-    </footer>
-
     <script>
                 /* ========== 登录 / 注册 逻辑 ========== */
         function loadUsers() {
@@ -978,10 +874,10 @@
             return [{ name: '管理员', username: 'admin', password: 'admin123', phone: '' }];
         }
         function saveUsers(users) { localStorage.setItem('gxd_users', JSON.stringify(users)); }
-        function getCurrentUser() { return localStorage.getItem('gxd_current_user'); }
+        function getCurrentUser() { return sessionStorage.getItem('gxd_current_user'); }
         function setCurrentUser(username) {
-            if (username) localStorage.setItem('gxd_current_user', username);
-            else localStorage.removeItem('gxd_current_user');
+            if (username) sessionStorage.setItem('gxd_current_user', username);
+            else sessionStorage.removeItem('gxd_current_user');
         }
 
         let loginMode = 'login';
@@ -1003,14 +899,38 @@
         }
 
         
+        function refreshDashboard() {
+            document.getElementById('dashboardSection').classList.add('show');
+            document.getElementById('userSection').classList.remove('show');
+            var cur = getCurrentUser();
+            document.getElementById('dashUserName').textContent = cur || '用户';
+            document.getElementById('dashTotalUsers').textContent = users.length;
+            var admins = users.filter(function(u) { return u.username === 'admin'; });
+            document.getElementById('dashAdminCount').textContent = admins.length;
+            document.getElementById('dashUserCount').textContent = users.length - admins.length;
+            var list = document.getElementById('dashRecentList');
+            var rev = users.slice().reverse();
+            var h = '';
+            for (var i = 0; i < Math.min(5, rev.length); i++) {
+                var u = rev[i];
+                var name = u.name || u.username;
+                h += '<div class="d-recent-item"><span class="d-name">' + name + '</span><span class="d-meta">' + u.username + (u.phone ? ' · ' + u.phone : '') + '</span></div>';
+            }
+            list.innerHTML = h || '<div class="d-empty-list">暂无数据</div>';
+        }
+
         function setupDashboard() {
             document.querySelectorAll('.nav-item[data-filter="dashboard"]').forEach(function(el) {
                 el.addEventListener('click', function() {
-                    document.getElementById('dashboardSection').classList.add('show');
-                    document.getElementById('userSection').classList.remove('show');
-                    document.querySelector('.toolbar').style.display = 'none';
-                    document.querySelector('.list-section').style.display = 'none';
+                    refreshDashboard();
                 });
+            });
+            document.getElementById('dashAddBtn').addEventListener('click', function() {
+                document.getElementById('openAddUserBtn').click();
+            });
+            document.getElementById('dashGotoUserBtn').addEventListener('click', function() {
+                var el = document.querySelector('.nav-item[data-filter="usermgr"]');
+                if (el) el.click();
             });
         }
 function setupLogin() {
@@ -1088,9 +1008,10 @@ function setupLogin() {
                     document.getElementById('userName').textContent = username;
                 }
                 // 登录后默认显示工作台
-                document.getElementById('dashboardSection').classList.add('show');
-                document.querySelector('.toolbar').style.display = 'none';
-                document.querySelector('.list-section').style.display = 'none';
+                refreshDashboard();
+
+
+
                 usernameInput.value = '';
                 passwordInput.value = '';
                 confirmInput.value = '';
@@ -1111,331 +1032,18 @@ function setupLogin() {
                 loginError.classList.remove('show');
             });
         }
-/* ======================================================
-           script.js — GXD 测试系统 应用逻辑
-           ====================================================== */
 
-        /* ========== 1. 数据管理 ========== */
 
-        function loadCases() {
-            const stored = localStorage.getItem('gxd_cases');
-            if (stored) {
-                try { return JSON.parse(stored); } catch (e) { /* 忽略损坏数据 */ }
-            }
-            return [
-                { id: 1, title: '用户登录功能验证', precond: '已注册账号', steps: '1. 打开登录页面\n2. 输入正确用户名和密码\n3. 点击登录', expected: '页面跳转到首页，显示用户昵称', priority: 'P0', status: '通过' },
-                { id: 2, title: '注册表单校验测试', precond: '无', steps: '1. 打开注册页面\n2. 不填任何字段直接提交\n3. 观察错误提示', expected: '所有必填字段显示红色错误提示', priority: 'P1', status: '待执行' },
-                { id: 3, title: '搜索功能边界测试', precond: '系统有至少1条数据', steps: '1. 输入超长搜索关键词\n2. 点击搜索\n3. 输入特殊字符 @@!! 搜索', expected: '系统正常处理，不崩溃', priority: 'P2', status: '执行中' },
-                { id: 4, title: '数据导出性能测试', precond: '系统中至少有10000条数据', steps: '1. 在数据管理页点击"导出"\n2. 记录导出完成时间', expected: '导出时间不超过30秒', priority: 'P0', status: '失败' },
-                { id: 5, title: '密码修改流程测试', precond: '用户已登录', steps: '1. 进入个人设置\n2. 修改密码\n3. 使用新密码重新登录', expected: '新旧密码切换正常，旧密码失效', priority: 'P1', status: '待执行' },
-                { id: 6, title: '移动端页面布局适配', precond: '无', steps: '1. 用手机浏览器打开系统\n2. 检查各页面布局是否错乱', expected: '页面自适应，无明显错位', priority: 'P3', status: '待执行' },
-            ];
-        }
-
-        function saveCases(cases) {
-            localStorage.setItem('gxd_cases', JSON.stringify(cases));
-        }
-
-        let cases = loadCases();
-        let currentFilter = 'all';
-        let currentPriority = 'all';
-        let currentSearch = '';
-        let currentPage = 1;
-        const PAGE_SIZE = 4;
-        let editingId = null;
-
-        /* ========== 2. 工具函数 ========== */
-
-        function generateId() {
-            return Date.now() + Math.floor(Math.random() * 1000);
-        }
-
-        function getFilteredData() {
-            let result = [...cases];
-            if (currentFilter !== 'all') {
-                result = result.filter(c => c.status === currentFilter);
-            }
-            if (currentPriority !== 'all') {
-                result = result.filter(c => c.priority === currentPriority);
-            }
-            if (currentSearch.trim()) {
-                const keyword = currentSearch.trim().toLowerCase();
-                result = result.filter(c => c.title.toLowerCase().includes(keyword));
-            }
-            result.sort((a, b) => b.id - a.id);
-            const total = result.length;
-            const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-            const page = Math.min(currentPage, totalPages);
-            const start = (page - 1) * PAGE_SIZE;
-            const pageData = result.slice(start, start + PAGE_SIZE);
-            return { pageData, total, totalPages, page };
-        }
-
-        function showToast(msg) {
-            const el = document.getElementById('toast');
-            el.textContent = msg;
-            el.classList.add('show');
-            clearTimeout(el._timer);
-            el._timer = setTimeout(() => el.classList.remove('show'), 2000);
-        }
-
-        /* ========== 3. 渲染 ========== */
-
-        function escapeHtml(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
-
-        function renderList() {
-            const { pageData, total, totalPages, page } = getFilteredData();
-            const container = document.getElementById('cardList');
-            const emptyState = document.getElementById('emptyState');
-            const pagination = document.getElementById('pagination');
-
-            document.getElementById('totalCount').textContent = cases.length;
-
-            if (pageData.length === 0) {
-                container.innerHTML = '';
-                emptyState.style.display = 'block';
-                pagination.style.display = 'none';
-                return;
-            }
-
-            emptyState.style.display = 'none';
-            pagination.style.display = 'flex';
-
-            const priorityMap = { P0: 'p0', P1: 'p1', P2: 'p2', P3: 'p3' };
-            let html = '';
-            pageData.forEach(c => {
-                html += `
-                    <div class="card" data-id="${c.id}">
-                        <div class="card-priority-bar ${priorityMap[c.priority] || 'p3'}"></div>
-                        <div class="card-body">
-                            <div class="card-title">${escapeHtml(c.title)}</div>
-                            <div class="card-meta">
-                                <span class="status-tag ${c.status}">${c.status}</span>
-                                <span class="priority-tag">${c.priority}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-            container.querySelectorAll('.card').forEach(el => {
-                el.addEventListener('click', () => showDetail(parseInt(el.dataset.id)));
-            });
-
-            currentPage = page;
-            document.getElementById('pageInfo').textContent = `第 ${page} 页 / 共 ${totalPages} 页（共 ${total} 条）`;
-            document.getElementById('prevPage').disabled = page <= 1;
-            document.getElementById('nextPage').disabled = page >= totalPages;
-        }
-
-        /* ========== 4. 弹窗交互 ========== */
-
-        function showDetail(id) {
-            const c = cases.find(item => item.id === id);
-            if (!c) return;
-            document.getElementById('detailBody').innerHTML = `
-                <div class="detail-field">
-                    <div class="detail-label">用例标题</div>
-                    <div class="detail-value">${escapeHtml(c.title)}</div>
-                </div>
-                <div class="detail-field">
-                    <div class="detail-label">前置条件</div>
-                    <div class="detail-value">${escapeHtml(c.precond || '无')}</div>
-                </div>
-                <div class="detail-field">
-                    <div class="detail-label">测试步骤</div>
-                    <div class="detail-value">${escapeHtml(c.steps)}</div>
-                </div>
-                <div class="detail-field">
-                    <div class="detail-label">预期结果</div>
-                    <div class="detail-value">${escapeHtml(c.expected)}</div>
-                </div>
-                <div class="detail-field">
-                    <div class="detail-label">优先级 / 状态</div>
-                    <div class="detail-value">${c.priority} · <span class="status-tag ${c.status}">${c.status}</span></div>
-                </div>
-            `;
-            document.getElementById('detailOverlay').dataset.viewId = id;
-            document.getElementById('detailOverlay').classList.add('show');
-        }
-
-        function openForm(id) {
-            editingId = id;
-            const form = document.getElementById('caseForm');
-            document.querySelectorAll('.form-group').forEach(el => el.classList.remove('invalid'));
-            form.reset();
-            if (id === null) {
-                document.getElementById('formTitle').textContent = '新建用例';
-                document.getElementById('caseStatus').value = '待执行';
-            } else {
-                document.getElementById('formTitle').textContent = '编辑用例';
-                const c = cases.find(item => item.id === id);
-                if (!c) return;
-                document.getElementById('caseTitle').value = c.title;
-                document.getElementById('casePrecond').value = c.precond || '';
-                document.getElementById('caseSteps').value = c.steps;
-                document.getElementById('caseExpected').value = c.expected;
-                document.getElementById('casePriority').value = c.priority;
-                document.getElementById('caseStatus').value = c.status;
-            }
-            document.getElementById('formOverlay').classList.add('show');
-        }
-
-        function validateForm() {
-            let valid = true;
-            const checks = [
-                { id: 'caseTitle', cls: 'form-group:has(#caseTitle)' },
-                { id: 'caseSteps', cls: 'form-group:has(#caseSteps)' },
-                { id: 'caseExpected', cls: 'form-group:has(#caseExpected)' },
-                { id: 'casePriority', cls: 'form-group:has(#casePriority)' },
-            ];
-            checks.forEach(({ id, cls }) => {
-                const group = document.querySelector(`.${cls}`);
-                const val = document.getElementById(id).value.trim();
-                if (!val) { group.classList.add('invalid'); valid = false; }
-                else { group.classList.remove('invalid'); }
-            });
-            return valid;
-        }
-
-        function saveForm() {
-            if (!validateForm()) { showToast('请完善必填字段'); return; }
-            const data = {
-                title: document.getElementById('caseTitle').value.trim(),
-                precond: document.getElementById('casePrecond').value.trim(),
-                steps: document.getElementById('caseSteps').value.trim(),
-                expected: document.getElementById('caseExpected').value.trim(),
-                priority: document.getElementById('casePriority').value,
-                status: document.getElementById('caseStatus').value,
-            };
-            if (editingId === null) {
-                data.id = generateId();
-                cases.unshift(data);
-                showToast('新建用例成功 🎉');
-            } else {
-                const idx = cases.findIndex(c => c.id === editingId);
-                if (idx !== -1) cases[idx] = { ...cases[idx], ...data };
-                showToast('更新用例成功 ✅');
-            }
-            saveCases(cases);
-            closeAllModals();
-            renderList();
-        }
-
-        let pendingDeleteId = null;
-
-        function confirmDelete(id) {
-            pendingDeleteId = id;
-            document.getElementById('confirmOverlay').classList.add('show');
-        }
-
-        function executeDelete() {
-            if (pendingDeleteId === null) return;
-            cases = cases.filter(c => c.id !== pendingDeleteId);
-            saveCases(cases);
-            pendingDeleteId = null;
-            closeAllModals();
-            renderList();
-            showToast('删除成功 🗑️');
-        }
-
-        function closeAllModals() {
-            document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('show'));
-            editingId = null;
-            pendingDeleteId = null;
-        }
-
-        /* ========== 5. 绑定事件 ========== */
-
-        function bindEvents() {
-            document.getElementById('sidebarToggle').addEventListener('click', () => {
-                document.getElementById('sidebar').classList.toggle('open');
-            });
-            document.querySelector('.main-content').addEventListener('click', () => {
-                const s = document.getElementById('sidebar');
-                if (window.innerWidth <= 768 && s.classList.contains('open')) s.classList.remove('open');
-            });
-            document.querySelectorAll('.nav-item').forEach(el => {
-                el.addEventListener('click', function () {
-                    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                    this.classList.add('active');
-                    currentFilter = this.dataset.filter;
-                    currentPage = 1;
-                    renderList();
-                });
-            });
-            let st = null;
-            document.getElementById('searchInput').addEventListener('input', function () {
-                clearTimeout(st);
-                st = setTimeout(() => { currentSearch = this.value; currentPage = 1; renderList(); }, 300);
-            });
-            document.getElementById('priorityFilter').addEventListener('change', function () {
-                currentPriority = this.value; currentPage = 1; renderList();
-            });
-            document.getElementById('addBtn').addEventListener('click', () => openForm(null));
-            document.getElementById('prevPage').addEventListener('click', () => {
-                if (currentPage > 1) { currentPage--; renderList(); }
-            });
-            document.getElementById('nextPage').addEventListener('click', () => {
-                const { totalPages } = getFilteredData();
-                if (currentPage < totalPages) { currentPage++; renderList(); }
-            });
-            document.getElementById('formClose').addEventListener('click', closeAllModals);
-            document.getElementById('formCancel').addEventListener('click', closeAllModals);
-            document.getElementById('formSave').addEventListener('click', saveForm);
-            document.getElementById('formOverlay').addEventListener('click', function (e) {
-                if (e.target === this) closeAllModals();
-            });
-            document.getElementById('detailClose').addEventListener('click', closeAllModals);
-            document.getElementById('detailCloseBtn').addEventListener('click', closeAllModals);
-            document.getElementById('detailOverlay').addEventListener('click', function (e) {
-                if (e.target === this) closeAllModals();
-            });
-            document.getElementById('detailEditBtn').addEventListener('click', function () {
-                const id = parseInt(document.getElementById('detailOverlay').dataset.viewId);
-                closeAllModals();
-                openForm(id);
-            });
-            document.getElementById('detailDeleteBtn').addEventListener('click', function () {
-                const id = parseInt(document.getElementById('detailOverlay').dataset.viewId);
-                closeAllModals();
-                confirmDelete(id);
-            });
-            document.getElementById('confirmClose').addEventListener('click', closeAllModals);
-            document.getElementById('confirmCancel').addEventListener('click', closeAllModals);
-            document.getElementById('confirmOverlay').addEventListener('click', function (e) {
-                if (e.target === this) closeAllModals();
-            });
-            document.getElementById('confirmOk').addEventListener('click', executeDelete);
-            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAllModals(); });
-        }
-
-        /* ========== 6. 初始化 ========== */
-
-        document.addEventListener('DOMContentLoaded', function () {
-            checkLogin();
-            setupLogin();
-                        setupUserPage();
-            $3
-            bindEvents();
-            renderList();
-        });
-    
-        /* ========== 用户管理 ========== */
-                function renderUserPage() {
+        function renderUserPage() {
             const tbody = document.getElementById('userTableBody');
             const currentUser = getCurrentUser();
             document.getElementById('userCount').textContent = users.length;
-            let html = '';
+            var html = '';
             users.forEach(function(u) {
-                const isSelf = u.username === currentUser;
-                const isDefault = u.username === 'admin';
                 const name = u.name || u.username;
                 const phone = u.phone || '-';
+                const isSelf = u.username === currentUser;
+                const isDefault = u.username === 'admin';
                 var actions = '';
                 if (isDefault && isSelf) {
                     actions = '<span style="color:var(--text-secondary);font-size:12px;">不可操作</span>';
@@ -1445,28 +1053,22 @@ function setupLogin() {
                 html += '<tr><td>' + name + (isSelf ? ' <span style="font-size:12px;color:var(--text-secondary)">(当前)</span>' : '') + '</td><td>' + u.username + '</td><td>' + u.password + '</td><td>' + phone + '</td><td>' + actions + '</td></tr>';
             });
             tbody.innerHTML = html;
-
-            // 编辑按钮
             tbody.querySelectorAll('.user-edit-btn').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     var uname = this.dataset.username;
                     var user = users.find(function(u) { return u.username === uname; });
                     if (!user) return;
-                    // 填充表单
                     document.getElementById('newName').value = user.name || '';
                     document.getElementById('newUserAccount').value = user.username;
                     document.getElementById('newUserPass').value = user.password;
                     document.getElementById('newUserPhone').value = user.phone || '';
                     document.getElementById('userMgrError').classList.remove('show');
-                    // 切换编辑模式
                     editingUsername = user.username;
                     document.getElementById('addUserModalTitle').textContent = '✏️ 编辑用户';
                     document.getElementById('newUserAccount').disabled = true;
                     document.getElementById('addUserOverlay').classList.add('show');
                 });
             });
-
-            // 删除按钮
             tbody.querySelectorAll('.user-del-btn').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     var delName = this.dataset.username;
@@ -1478,34 +1080,24 @@ function setupLogin() {
                 });
             });
         }
-                function setupUserPage() {
-            // 打开用户管理
+
+        function setupUserPage() {
             document.querySelectorAll('.nav-item[data-filter="usermgr"]').forEach(function(el) {
                 el.addEventListener('click', function() {
-                    document.getElementById('dashboardSection').classList.remove('show');
                     document.getElementById('userSection').classList.add('show');
-                    document.querySelector('.toolbar').style.display = 'none';
-                    document.querySelector('.list-section').style.display = 'none';
+                    document.getElementById('dashboardSection').classList.remove('show');
                     document.querySelector('.main-content').scrollTop = 0;
                     renderUserPage();
                 });
             });
-
-            // 其他侧边栏隐藏用户管理
             document.querySelectorAll('.nav-item').forEach(function(el) {
                 if (el.dataset.filter !== 'usermgr' && el.dataset.filter !== 'dashboard') {
-                                        el.addEventListener('click', function() {
+                    el.addEventListener('click', function() {
                         document.getElementById('dashboardSection').classList.remove('show');
-                    document.getElementById('userSection').classList.remove('show');
-                        var tb = document.querySelector('.toolbar');
-                        if (tb) tb.style.display = '';
-                        var ls = document.querySelector('.list-section');
-                        if (ls) ls.style.display = '';
+                        document.getElementById('userSection').classList.remove('show');
                     });
                 }
             });
-
-            // 打开新增弹窗
             document.getElementById('openAddUserBtn').addEventListener('click', function() {
                 editingUsername = null;
                 document.getElementById('addUserModalTitle').textContent = '＋ 新增用户';
@@ -1516,28 +1108,21 @@ function setupLogin() {
                 document.getElementById('userMgrError').classList.remove('show');
                 document.getElementById('addUserOverlay').classList.add('show');
             });
-
-            // 关闭弹窗
             function closeUM() { document.getElementById('addUserOverlay').classList.remove('show'); }
             document.getElementById('addUserClose').addEventListener('click', closeUM);
             document.getElementById('addUserCancel').addEventListener('click', closeUM);
             document.getElementById('addUserOverlay').addEventListener('click', function(e) { if (e.target === this) closeUM(); });
-
-            // 确定添加/编辑
             document.getElementById('addUserConfirm').addEventListener('click', function() {
                 var name = document.getElementById('newName').value.trim();
                 var username = document.getElementById('newUserAccount').value.trim();
                 var password = document.getElementById('newUserPass').value.trim();
                 var phone = document.getElementById('newUserPhone').value.trim();
                 var err = document.getElementById('userMgrError');
-
                 if (!name || !username || !password) { err.textContent = '名称、账号、密码为必填项'; err.classList.add('show'); return; }
                 if (password.length < 4) { err.textContent = '密码长度不能少于4位'; err.classList.add('show'); return; }
                 if (!editingUsername && users.some(function(u) { return u.username === username; })) { err.textContent = '该账号已存在'; err.classList.add('show'); return; }
                 err.classList.remove('show');
-
                 if (editingUsername) {
-                    // 编辑模式
                     var idx = users.findIndex(function(u) { return u.username === editingUsername; });
                     if (idx !== -1) {
                         users[idx].name = name;
@@ -1547,7 +1132,6 @@ function setupLogin() {
                         showToast('用户信息已更新');
                     }
                 } else {
-                    // 新增模式
                     users.push({ name: name, username: username, password: password, phone: phone });
                     saveUsers(users);
                     showToast('新增用户成功：' + name);
@@ -1556,10 +1140,33 @@ function setupLogin() {
                 renderUserPage();
             });
         }
+/* ======================================================
+           script.js — GXD 测试系统 应用逻辑
+           ====================================================== */
 
+        /* ========== 初始化 ========== */
+
+        document.addEventListener('DOMContentLoaded', function () {
+            checkLogin();
+            setupLogin();
+            setupDashboard();
+            setupUserPage();
+                });
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
