@@ -694,6 +694,12 @@
         .user-table tbody tr:hover td { background: #f8fafc; }
         .user-del-btn { background: none; border: 1px solid transparent; color: var(--danger); cursor: pointer; font-size: 13px; padding: 4px 12px; border-radius: 4px; }
         .user-del-btn:hover { background: #fee2e2; border-color: #fecaca; }
+    /* ---------- 工作台 ---------- */
+    .dashboard-section { display: none; }
+    .dashboard-section.show { display: block; }
+    .dashboard-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 40px; text-align: center; box-shadow: var(--shadow); }
+    .dashboard-card h2 { font-size: 20px; margin-bottom: 8px; }
+    .dashboard-card p { color: var(--text-secondary); font-size: 14px; }
    </style>
     </head>
 <body>
@@ -743,7 +749,10 @@
         <aside class="sidebar" id="sidebar">
             <nav>
                 <ul class="nav-list">
-                    <li class="nav-item active" data-filter="all">
+                                        <li class="nav-item active" data-filter="dashboard">
+                        <span class="nav-icon">🏠</span> 工作台
+                    </li>
+                    <li class="nav-item" data-filter="all">
                         <span class="nav-icon">📋</span> 全部用例
                     </li>
                     <li class="nav-item" data-filter="待执行">
@@ -770,6 +779,14 @@
         <!-- ========== 主体内容 ========== -->
         <main class="main-content">
 
+                        <!-- ========== 工作台 ========== -->
+            <section class="dashboard-section" id="dashboardSection">
+                <div class="dashboard-card">
+                    <h2>🏠 工作台</h2>
+                    <p>欢迎使用 GXD 测试系统</p>
+                    <p style="margin-top:8px;font-size:13px;">功能开发中，敬请期待...</p>
+                </div>
+            </section>
             <section class="toolbar">
                 <div class="toolbar-row">
                     <div class="search-box">
@@ -985,7 +1002,18 @@
             }
         }
 
-        function setupLogin() {
+        
+        function setupDashboard() {
+            document.querySelectorAll('.nav-item[data-filter="dashboard"]').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    document.getElementById('dashboardSection').classList.add('show');
+                    document.getElementById('userSection').classList.remove('show');
+                    document.querySelector('.toolbar').style.display = 'none';
+                    document.querySelector('.list-section').style.display = 'none';
+                });
+            });
+        }
+function setupLogin() {
             const loginPage = document.getElementById('loginPage');
             const loginForm = document.getElementById('loginForm');
             const loginBtn = document.getElementById('loginBtn');
@@ -1059,6 +1087,10 @@
                     loginPage.classList.add('hidden');
                     document.getElementById('userName').textContent = username;
                 }
+                // 登录后默认显示工作台
+                document.getElementById('dashboardSection').classList.add('show');
+                document.querySelector('.toolbar').style.display = 'none';
+                document.querySelector('.list-section').style.display = 'none';
                 usernameInput.value = '';
                 passwordInput.value = '';
                 confirmInput.value = '';
@@ -1388,6 +1420,7 @@
             checkLogin();
             setupLogin();
                         setupUserPage();
+            $3
             bindEvents();
             renderList();
         });
@@ -1449,6 +1482,7 @@
             // 打开用户管理
             document.querySelectorAll('.nav-item[data-filter="usermgr"]').forEach(function(el) {
                 el.addEventListener('click', function() {
+                    document.getElementById('dashboardSection').classList.remove('show');
                     document.getElementById('userSection').classList.add('show');
                     document.querySelector('.toolbar').style.display = 'none';
                     document.querySelector('.list-section').style.display = 'none';
@@ -1459,9 +1493,10 @@
 
             // 其他侧边栏隐藏用户管理
             document.querySelectorAll('.nav-item').forEach(function(el) {
-                if (el.dataset.filter !== 'usermgr') {
-                    el.addEventListener('click', function() {
-                        document.getElementById('userSection').classList.remove('show');
+                if (el.dataset.filter !== 'usermgr' && el.dataset.filter !== 'dashboard') {
+                                        el.addEventListener('click', function() {
+                        document.getElementById('dashboardSection').classList.remove('show');
+                    document.getElementById('userSection').classList.remove('show');
                         var tb = document.querySelector('.toolbar');
                         if (tb) tb.style.display = '';
                         var ls = document.querySelector('.list-section');
@@ -1525,6 +1560,12 @@
 </script>
 </body>
 </html>
+
+
+
+
+
+
 
 
 
