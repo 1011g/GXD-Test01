@@ -715,6 +715,23 @@
     .d-recent-item .d-name { font-weight: 500; }
     .d-recent-item .d-meta { color: var(--text-secondary); font-size: 12px; }
     .d-empty-list { text-align: center; padding: 24px; color: var(--text-secondary); font-size: 14px; }
+    
+    /* ---------- 报检单 ---------- */
+    .inspect-section { display: none; }
+    .inspect-section.show { display: block; animation: fadeIn 0.2s ease; }
+    .inspect-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .inspect-header h2 { font-size: 18px; font-weight: 700; }
+    .inspect-search { display: flex; gap: 10px; margin-bottom: 16px; }
+    .inspect-search input { flex: 1; max-width: 300px; padding: 9px 14px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; outline: none; transition: border-color 0.15s; }
+    .inspect-search input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
+    .inspect-table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+    .inspect-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .inspect-table thead { background: #f8fafc; }
+    .inspect-table th { padding: 14px 16px; text-align: left; font-weight: 600; font-size: 13px; color: var(--text-secondary); border-bottom: 2px solid var(--border); }
+    .inspect-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .inspect-table tbody tr:last-child td { border-bottom: none; }
+    .inspect-table tbody tr:hover td { background: #f8fafc; }
+    .inspect-empty { text-align: center; padding: 40px; color: var(--text-secondary); font-size: 14px; }
    </style>
     </head>
 <body>
@@ -767,7 +784,9 @@
                     <li class="nav-item active" data-filter="dashboard">
                         <span class="nav-icon">🏠</span> 工作台
                     </li>
-                    <li class="nav-item" data-filter="usermgr" style="margin-top:4px;border-top:1px solid var(--border);padding-top:8px;">
+                                        <li class="nav-item" data-filter="inspect">
+                        <span class="nav-icon">📄</span> 报检单
+                    </li><li class="nav-item" data-filter="usermgr" style="margin-top:4px;border-top:1px solid var(--border);padding-top:8px;">
                         <span class="nav-icon">👥</span> 用户管理
                     </li>
                 </ul>
@@ -831,10 +850,64 @@
                     </table>
                 </div>
             </section>
+            <!-- ========== 报检单 ========== -->
+            <section class="inspect-section" id="inspectSection">
+                <div class="inspect-header">
+                    <h2>📄 报检单</h2>
+                    <button class="btn btn-primary" id="addInspectBtn" style="white-space:nowrap;">＋ 新增报检单</button>
+                </div>
+                <div class="inspect-search">
+                    <input type="text" id="inspectSearch" placeholder="输入报检单号搜索...">
+                    <button class="btn btn-secondary" id="inspectSearchBtn">搜索</button>
+                    <button class="btn btn-secondary" id="inspectResetBtn">重置</button>
+                </div>
+                <div class="inspect-table-wrap">
+                    <table class="inspect-table">
+                        <thead>
+                            <tr><th>报检单号</th><th>报检人</th><th>报检时间</th><th>报检项目</th><th>操作</th></tr>
+                        </thead>
+                        <tbody id="inspectTableBody"></tbody>
+                    </table>
+                    <div class="inspect-empty" id="inspectEmpty" style="display:none;">暂无报检单数据</div>
+                </div>
+            </section>
 </main>
     </div>
 
-        <!-- ========== 新增用户弹窗 ========== -->
+            <!-- ========== 新增报检单弹窗 ========== -->
+    <div class="modal-overlay" id="inspectModal">
+        <div class="modal" style="max-width:480px;">
+            <div class="modal-header">
+                <h2 id="inspectModalTitle">＋ 新增报检单</h2>
+                <button class="modal-close" id="inspectModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>报检单号</label>
+                    <input type="text" id="inspectOrderNo" readonly style="background:#f8fafc;color:var(--text-secondary);">
+                </div>
+                <div class="form-group">
+                    <label>报检人</label>
+                    <input type="text" id="inspectPerson" readonly style="background:#f8fafc;color:var(--text-secondary);">
+                </div>
+                <div class="form-group">
+                    <label>报检时间</label>
+                    <input type="text" id="inspectTime" readonly style="background:#f8fafc;color:var(--text-secondary);">
+                </div>
+                <div class="form-group">
+                    <label>报检项目 <span class="required">*</span></label>
+                    <input type="text" id="inspectProject" placeholder="请输入报检项目">
+                </div>
+                <div class="login-error" id="inspectError"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="inspectModalCancel">取消</button>
+                <button class="btn btn-primary" id="inspectModalSave">保存</button>
+            </div>
+        </div>
+    </div>
+
+<!-- ========== 新增用户弹窗 ========== -->
     <div class="modal-overlay" id="addUserOverlay">
         <div class="modal" style="max-width:480px;">
             <div class="modal-header">
@@ -1081,7 +1154,158 @@ function setupLogin() {
             });
         }
 
-        function setupUserPage() {
+        
+        /* ========== 报检单 ========== */
+        let editingInspectId = null;
+
+        function loadInspects() {
+            var d = localStorage.getItem('gxd_inspects');
+            if (d) { try { return JSON.parse(d); } catch(e) {} }
+            return [];
+        }
+        function saveInspects(data) { localStorage.setItem('gxd_inspects', JSON.stringify(data)); }
+
+        function genOrderNo() {
+            var now = new Date();
+            var y = now.getFullYear();
+            var m = ('0' + (now.getMonth()+1)).slice(-2);
+            var d = ('0' + now.getDate()).slice(-2);
+            var prefix = '' + y + m + d;
+            var inspects = loadInspects();
+            var max = 0;
+            inspects.forEach(function(item) {
+                if (item.orderNo.indexOf(prefix) === 0) {
+                    var num = parseInt(item.orderNo.slice(-3), 10);
+                    if (num > max) max = num;
+                }
+            });
+            return prefix + ('00' + (max + 1)).slice(-3);
+        }
+
+        function renderInspects(keyword) {
+            var tbody = document.getElementById('inspectTableBody');
+            var empty = document.getElementById('inspectEmpty');
+            var list = loadInspects();
+            if (keyword) {
+                list = list.filter(function(item) { return item.orderNo.indexOf(keyword) >= 0; });
+            }
+            list.reverse();
+            if (list.length === 0) {
+                tbody.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+            var h = '';
+            list.forEach(function(item) {
+                h += '<tr><td>' + item.orderNo + '</td><td>' + item.inspector + '</td><td>' + item.inspectTime + '</td><td>' + item.project + '</td><td><button class="inspect-edit-btn" data-id="' + item.id + '" style="background:none;border:1px solid var(--border);color:var(--primary);cursor:pointer;font-size:12px;padding:4px 12px;border-radius:4px;margin-right:6px;">编辑</button><button class="inspect-del-btn" data-id="' + item.id + '" style="background:none;border:1px solid transparent;color:var(--danger);cursor:pointer;font-size:12px;padding:4px 12px;border-radius:4px;">删除</button></td></tr>';
+            });
+            tbody.innerHTML = h;
+            tbody.querySelectorAll('.inspect-edit-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var id = parseInt(this.dataset.id, 10);
+                    var list2 = loadInspects();
+                    var item = list2.find(function(x) { return x.id === id; });
+                    if (!item) return;
+                    editingInspectId = id;
+                    document.getElementById('inspectModalTitle').textContent = '✏️ 编辑报检单';
+                    document.getElementById('inspectOrderNo').value = item.orderNo;
+                    document.getElementById('inspectPerson').value = item.inspector;
+                    document.getElementById('inspectTime').value = item.inspectTime;
+                    document.getElementById('inspectProject').value = item.project;
+                    document.getElementById('inspectError').classList.remove('show');
+                    document.getElementById('inspectModal').classList.add('show');
+                });
+            });
+            tbody.querySelectorAll('.inspect-del-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var id = parseInt(this.dataset.id, 10);
+                    var list2 = loadInspects();
+                    var idx = list2.findIndex(function(x) { return x.id === id; });
+                    if (idx !== -1) list2.splice(idx, 1);
+                    saveInspects(list2);
+                    renderInspects(document.getElementById('inspectSearch').value.trim());
+                });
+            });
+        }
+
+        function setupInspect() {
+            document.querySelectorAll('.nav-item[data-filter="inspect"]').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    document.getElementById('inspectSection').classList.add('show');
+                    document.getElementById('dashboardSection').classList.remove('show');
+                    document.getElementById('userSection').classList.remove('show');
+                    renderInspects();
+                });
+            });
+            // 其他侧边栏隐藏报检单
+            document.querySelectorAll('.nav-item').forEach(function(el) {
+                if (el.dataset.filter !== 'inspect' && el.dataset.filter !== 'usermgr' && el.dataset.filter !== 'dashboard') {
+                    el.addEventListener('click', function() {
+                        document.getElementById('inspectSection').classList.remove('show');
+                    });
+                }
+            });
+
+            document.getElementById('addInspectBtn').addEventListener('click', function() {
+                editingInspectId = null;
+                var cur = getCurrentUser() || '未知';
+                var now = new Date();
+                var timeStr = now.getFullYear() + '-' + ('0'+(now.getMonth()+1)).slice(-2) + '-' + ('0'+now.getDate()).slice(-2) + ' ' + ('0'+now.getHours()).slice(-2) + ':' + ('0'+now.getMinutes()).slice(-2) + ':' + ('0'+now.getSeconds()).slice(-2);
+                document.getElementById('inspectModalTitle').textContent = '＋ 新增报检单';
+                document.getElementById('inspectOrderNo').value = genOrderNo();
+                document.getElementById('inspectPerson').value = cur;
+                document.getElementById('inspectTime').value = timeStr;
+                document.getElementById('inspectProject').value = '';
+                document.getElementById('inspectError').classList.remove('show');
+                document.getElementById('inspectModal').classList.add('show');
+            });
+
+            function closeInspectModal() { document.getElementById('inspectModal').classList.remove('show'); }
+            document.getElementById('inspectModalClose').addEventListener('click', closeInspectModal);
+            document.getElementById('inspectModalCancel').addEventListener('click', closeInspectModal);
+            document.getElementById('inspectModal').addEventListener('click', function(e) { if (e.target === this) closeInspectModal(); });
+
+            document.getElementById('inspectModalSave').addEventListener('click', function() {
+                var project = document.getElementById('inspectProject').value.trim();
+                var err = document.getElementById('inspectError');
+                if (!project) { err.textContent = '请填写报检项目'; err.classList.add('show'); return; }
+                err.classList.remove('show');
+                var list = loadInspects();
+                if (editingInspectId) {
+                    var idx = list.findIndex(function(x) { return x.id === editingInspectId; });
+                    if (idx !== -1) {
+                        list[idx].project = project;
+                        saveInspects(list);
+                    }
+                } else {
+                    list.push({
+                        id: Date.now(),
+                        orderNo: document.getElementById('inspectOrderNo').value,
+                        inspector: document.getElementById('inspectPerson').value,
+                        inspectTime: document.getElementById('inspectTime').value,
+                        project: project
+                    });
+                    saveInspects(list);
+                }
+                closeInspectModal();
+                renderInspects(document.getElementById('inspectSearch').value.trim());
+            });
+
+            document.getElementById('inspectSearchBtn').addEventListener('click', function() {
+                renderInspects(document.getElementById('inspectSearch').value.trim());
+            });
+            document.getElementById('inspectSearch').addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') renderInspects(this.value.trim());
+            });
+
+            document.getElementById('inspectResetBtn').addEventListener('click', function() {
+                document.getElementById('inspectSearch').value = '';
+                renderInspects('');
+            });
+        }
+function setupUserPage() {
+            setupInspect();
             document.querySelectorAll('.nav-item[data-filter="usermgr"]').forEach(function(el) {
                 el.addEventListener('click', function() {
                     document.getElementById('userSection').classList.add('show');
@@ -1155,6 +1379,8 @@ function setupLogin() {
 </script>
 </body>
 </html>
+
+
 
 
 
