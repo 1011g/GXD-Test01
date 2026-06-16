@@ -987,7 +987,7 @@
             }
             return result;
         }
-        function saveUsers(usersData) { localStorage.setItem('gxd_users', JSON.stringify(usersData)); sbSyncAll('users', usersData); }
+        function saveUsers(usersData) { localStorage.setItem('gxd_users', JSON.stringify(usersData)); sbSyncAll('users', usersData, 'username'); }
         function getCurrentUser() { return sessionStorage.getItem('gxd_current_user'); }
         function setCurrentUser(username) {
             if (username) sessionStorage.setItem('gxd_current_user', username);
@@ -1023,10 +1023,19 @@
             return fetch(SB_URL + '/rest/v1/' + table, o).catch(function() { return null; });
 
         }
-        function sbSyncAll(table, data) {
-            sbReq('DELETE', table + '?id=gte.0').then(function() {
-                if (data && data.length > 0) sbReq('POST', table, data);
-            });
+        function sbSyncAll(table, data, conflict) {
+            if (!data || data.length === 0) return;
+            var url = SB_URL + '/rest/v1/' + table + '?on_conflict=' + (conflict || 'id');
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'apikey': SB_KEY,
+                    'Authorization': 'Bearer ' + SB_KEY,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'resolution=merge-duplicates'
+                },
+                body: JSON.stringify(data)
+            }).catch(function() {});
         }
         function syncFromCloud() {
             sbReq('GET', 'users?select=*').then(function(r) {
@@ -1563,6 +1572,8 @@ function setupUserPage() {
 </script>
 </body>
 </html>
+
+
 
 
 
