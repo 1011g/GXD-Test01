@@ -1014,11 +1014,14 @@
             var h = {};
             h['apikey'] = SB_KEY;
             h['Authorization'] = 'Bearer ' + SB_KEY;
-            h['Content-Type'] = 'application/json';
-            h['Prefer'] = 'return=minimal';
+            if (body) {
+                h['Content-Type'] = 'application/json';
+                h['Prefer'] = 'return=minimal';
+            }
             var o = { method: method, headers: h };
             if (body) o.body = JSON.stringify(body);
             return fetch(SB_URL + '/rest/v1/' + table, o).catch(function() { return null; });
+
         }
         function sbSyncAll(table, data) {
             sbReq('DELETE', table + '?id=gte.0').then(function() {
