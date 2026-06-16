@@ -987,7 +987,7 @@
             }
             return result;
         }
-        function saveUsers(users) { localStorage.setItem('gxd_users', JSON.stringify(users)); }
+        function saveUsers(usersData) { localStorage.setItem('gxd_users', JSON.stringify(usersData)); sbSyncAll('users', usersData); }
         function getCurrentUser() { return sessionStorage.getItem('gxd_current_user'); }
         function setCurrentUser(username) {
             if (username) sessionStorage.setItem('gxd_current_user', username);
@@ -1006,7 +1006,47 @@
         }
         const users = loadUsers();
 
-        function checkLogin() {
+        
+        /* ========== Supabase 云端同步 ========== */
+        var SB_URL = 'https://gdeysdxcfkhreuqmmqax.supabase.co';
+        var SB_KEY = 'sb_publishable_VLk3nhCvSQUgluYPcnoWSQ_YA-ubV5U';
+        function sbReq(method, table, body) {
+            var h = {};
+            h['apikey'] = SB_KEY;
+            h['Authorization'] = 'Bearer ' + SB_KEY;
+            h['Content-Type'] = 'application/json';
+            h['Prefer'] = 'return=minimal';
+            var o = { method: method, headers: h };
+            if (body) o.body = JSON.stringify(body);
+            return fetch(SB_URL + '/rest/v1/' + table, o).catch(function() { return null; });
+        }
+        function sbSyncAll(table, data) {
+            sbReq('DELETE', table + '?id=gte.0').then(function() {
+                if (data && data.length > 0) sbReq('POST', table, data);
+            });
+        }
+        function syncFromCloud() {
+            sbReq('GET', 'users?select=*').then(function(r) {
+                if (r && r.ok) return r.json();
+            }).then(function(data) {
+                if (Array.isArray(data) && data.length > 0) {
+                    localStorage.setItem('gxd_users', JSON.stringify(data));
+                    users.splice(0, users.length);
+                    data.forEach(function(u) { users.push(u); });
+                }
+            });
+            sbReq('GET', 'inspects?select=*').then(function(r) {
+                if (r && r.ok) return r.json();
+            }).then(function(data) {
+                if (Array.isArray(data)) localStorage.setItem('gxd_inspects', JSON.stringify(data));
+            });
+            sbReq('GET', 'receives?select=*').then(function(r) {
+                if (r && r.ok) return r.json();
+            }).then(function(data) {
+                if (Array.isArray(data)) localStorage.setItem('gxd_receives', JSON.stringify(data));
+            });
+        }
+function checkLogin() {
             const loginPage = document.getElementById('loginPage');
             const currentUser = getCurrentUser();
             if (currentUser && users.some(u => u.username === currentUser)) {
@@ -1214,7 +1254,7 @@ function setupLogin() {
             if (d) { try { return JSON.parse(d); } catch(e) {} }
             return [];
         }
-        function saveInspects(data) { localStorage.setItem('gxd_inspects', JSON.stringify(data)); }
+        function saveInspects(data) { localStorage.setItem('gxd_inspects', JSON.stringify(data)); sbSyncAll('inspects', data); }
 
         function genOrderNo() {
             var now = new Date();
@@ -1317,7 +1357,7 @@ function setupLogin() {
             if (d) { try { return JSON.parse(d); } catch(e) {} }
             return [];
         }
-        function saveReceives(data) { localStorage.setItem('gxd_receives', JSON.stringify(data)); }
+        function saveReceives(data) { localStorage.setItem('gxd_receives', JSON.stringify(data)); sbSyncAll('receives', data); }
 
         function renderReceives() {
             var tbody = document.getElementById('receiveTableBody');
@@ -1515,10 +1555,12 @@ function setupUserPage() {
             setupUserPage();
             setupInspect();
             setupReceive();
+            syncFromCloud();
                 });
 </script>
 </body>
 </html>
+
 
 
 
